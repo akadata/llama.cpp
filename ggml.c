@@ -25,7 +25,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <signal.h>
-
+#include <immintrin.h>
 #ifdef GGML_USE_METAL
 #include <unistd.h>
 #endif
@@ -665,12 +665,16 @@ static inline __m256 sum_i16_pairs_float(const __m256i x) {
     return _mm256_cvtepi32_ps(summed_pairs);
 }
 
+
+
 static inline __m256 mul_sum_us8_pairs_float(const __m256i ax, const __m256i sy) {
 #if __AVXVNNI__
+    // Use AVX-VNNI instruction to perform dot product and accumulate
     const __m256i zero = _mm256_setzero_si256();
     const __m256i summed_pairs = _mm256_dpbusd_epi32(zero, ax, sy);
     return _mm256_cvtepi32_ps(summed_pairs);
 #else
+    // If AVX-VNNI is not available, fall back to an alternative implementation
     // Perform multiplication and create 16-bit values
     const __m256i dot = _mm256_maddubs_epi16(ax, sy);
     return sum_i16_pairs_float(dot);
@@ -5494,39 +5498,6 @@ struct ggml_tensor * ggml_view_tensor(
     return result;
 }
 
-struct ggml_tensor * ggml_get_first_tensor(struct ggml_context * ctx) {
-    struct ggml_object * obj = ctx->objects_begin;
-
-    char * const mem_buffer = ctx->mem_buffer;
-
-    while (obj != NULL) {
-        if (obj->type == GGML_OBJECT_TENSOR) {
-            return (struct ggml_tensor *)(mem_buffer + obj->offs);
-        }
-
-        obj = obj->next;
-    }
-
-    return NULL;
-}
-
-struct ggml_tensor * ggml_get_next_tensor(struct ggml_context * ctx, struct ggml_tensor * tensor) {
-    struct ggml_object * obj = (struct ggml_object *) ((char *)tensor - GGML_OBJECT_SIZE);
-    obj = obj->next;
-
-    char * const mem_buffer = ctx->mem_buffer;
-
-    while (obj != NULL) {
-        if (obj->type == GGML_OBJECT_TENSOR) {
-            return (struct ggml_tensor *)(mem_buffer + obj->offs);
-        }
-
-        obj = obj->next;
-    }
-
-    return NULL;
-}
-
 struct ggml_tensor * ggml_get_tensor(struct ggml_context * ctx, const char * name) {
     struct ggml_object * obj = ctx->objects_begin;
 
@@ -8680,7 +8651,6 @@ void ggml_set_param(
 
     GGML_ASSERT(tensor->grad == NULL);
     tensor->grad = ggml_dup_tensor(ctx, tensor);
-    ggml_format_name(tensor->grad, "%s (grad)", tensor->name);
 }
 
 // ggml_compute_forward_dup
@@ -21916,6 +21886,14 @@ int ggml_cpu_has_avx512(void) {
 
 int ggml_cpu_has_avx512_vbmi(void) {
 #if defined(__AVX512VBMI__)
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+int ggml_cpu_has_avx_vnni(void) {
+#if defined(__AVXVNNI__)
     return 1;
 #else
     return 0;

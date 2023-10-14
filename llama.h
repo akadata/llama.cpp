@@ -8,6 +8,7 @@
 #else
 #define LLAMA_MAX_DEVICES 1
 #endif // GGML_USE_CUBLAS
+#include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>

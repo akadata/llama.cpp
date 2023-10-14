@@ -5721,6 +5721,7 @@ static struct ggml_cgraph * llama_build_graph(
 //
 //   - lctx:      llama context
 //   - batch:     batch to evaluate
+//   - n_threads: number of threads to use
 //
 // return 0 on success
 // return positive int on warning
@@ -9542,6 +9543,7 @@ const char * llama_print_system_info(void) {
     s  = "";
     s += "AVX = "         + std::to_string(ggml_cpu_has_avx())         + " | ";
     s += "AVX2 = "        + std::to_string(ggml_cpu_has_avx2())        + " | ";
+    s += "AVX_VNNI = "    + std::to_string(ggml_cpu_has_avx_vnni())    + " | ";
     s += "AVX512 = "      + std::to_string(ggml_cpu_has_avx512())      + " | ";
     s += "AVX512_VBMI = " + std::to_string(ggml_cpu_has_avx512_vbmi()) + " | ";
     s += "AVX512_VNNI = " + std::to_string(ggml_cpu_has_avx512_vnni()) + " | ";
