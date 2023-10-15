@@ -66,7 +66,7 @@ endif()
 
 option(LLAMA_AVX                             "llama: enable AVX"                                ${INS_ENB})
 option(LLAMA_AVX2                            "llama: enable AVX2"                               ${INS_ENB})
-option(LLAMA_AVX_VNNI			             "llama: enable AVX_VNNI"			            	ON)
+option(LLAMA_AVX_VNNI			             "llama: enable AVX_VNNI"			OFF)
 option(LLAMA_AVX512                          "llama: enable AVX512"                             OFF)
 option(LLAMA_AVX512_VBMI                     "llama: enable AVX512-VBMI"                        OFF)
 option(LLAMA_AVX512_VNNI                     "llama: enable AVX512-VNNI"                        OFF)
